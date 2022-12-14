@@ -35,9 +35,6 @@ Sky.SkyShader = {
     sunPosition: {
       value: new Vector3()
     },
-    moonPosition: {
-      value: new Vector3()
-    },
     skyBoxRadius: {
       value: null
     },
@@ -51,9 +48,6 @@ Sky.SkyShader = {
       value: null
     },
     noiseTexture2: {
-      value: null
-    },
-    cubeMap: {
       value: null
     },
     skyTexture: {
@@ -86,8 +80,6 @@ Sky.SkyShader = {
   varying vec3 vWorldPosition;
 
   uniform vec3 sunPosition;
-  uniform vec3 moonPosition;
-  uniform sampler2D moonTexture;
   uniform sampler2D starTexture;
   uniform sampler2D noiseTexture;
   uniform sampler2D galaxyTexture;
@@ -98,8 +90,6 @@ Sky.SkyShader = {
   
   uniform float skyBoxRadius;
   uniform float uTime;
-
-  uniform samplerCube cubeMap;
 
   vec3 FlowUVW (vec2 uv, vec2 flowVector, float flowOffset, float t, bool flowB) {
     float phaseOffset = flowB ? 0.5 : 0.;
@@ -128,46 +118,26 @@ Sky.SkyShader = {
     vec3 fallSunColor = sunColor.rgb * 0.4;
     vec3 finalSunColor = mix(fallSunColor, sunColor.rgb, smoothstep(-0.03, 0.03, sunPosition.y)) * sunArea;
 
-    //################################################## Moon light color ################################################## 
-    float moonSize = 1000.;
-    float moonInnerBound = 0.1;
-    float moonOuterBound = 2.0;
-    vec4 moonColor = vec4(0.1, 0.7, 0.9, 1.0);
-
-    float moonDist = distance(vWorldPosition, moonPosition);
-    float moonArea = 1. - moonDist / moonSize;
-    moonArea = smoothstep(moonInnerBound, moonOuterBound, moonArea);
-    vec3 fallmoonColor = moonColor.rgb * 0.4;
-    vec3 finalmoonColor = mix(fallmoonColor, moonColor.rgb, smoothstep(-0.03, 0.03, moonPosition.y)) * moonArea;
-    
     //################################################## Sky color ################################################## 
     vec3 dayBottomColor = vec3(0.72, 0.82, 0.96);
     vec3 dayMidColor = vec3(0.35, 0.83, 0.95);
     vec3 dayTopColor = vec3(0.03, 0.43, 0.98);
-    vec3 nightBottomColor = vec3(0.035, 0.21, 0.46);
-    vec3 nightTopColor = vec3(0.3, 0.4, 0.61);
-
-    float verticalPos = vUv.y * 0.5;
-    float sunNightStep = smoothstep(-0.3, 0.25, sunPosition.y / skyBoxRadius);
 
     vec3 gradientDay = mix(dayBottomColor, dayMidColor, clamp(vUv.y, 0.0, 1.0)) * step(0.0, -vUv.y)
                        + mix(dayMidColor, dayTopColor, clamp(vUv.y, 0.0, 1.0)) * step(0.0, vUv.y);
-    vec3 gradientNight = mix(nightBottomColor, nightTopColor, verticalPos);
-    vec3 skyGradients = mix(gradientNight, gradientDay, sunNightStep);
+   
+    vec3 skyGradients = gradientDay;
 
     //################################################## Horizon Color ################################################## 
-    float nightHorWidth = 0.6;
     float dayHorWidth = 0.53;
-    float nightHorStrenth = 10.;
     float dayHorStrenth = 15.;
 
-    vec3 nightHorColor = vec3(0.3, 0.4, 0.61);
     vec3 dayHorColor = vec3(0.7, 0.7, 0.7);
     
-    float horWidth = mix(nightHorWidth, dayHorWidth, sunNightStep);
-    float horStrenth = mix(nightHorStrenth, dayHorStrenth, sunNightStep);
+    float horWidth = dayHorWidth;
+    float horStrenth = dayHorStrenth;
     float horLineMask = smoothstep(-horWidth, 0., vUv.y) * smoothstep(-horWidth, 0., -vUv.y);
-    vec3 horLineGradients = mix(nightHorColor, dayHorColor, sunNightStep);
+    vec3 horLineGradients = dayHorColor;
     vec3 finalSkyColor = skyGradients * (1. - horLineMask) + horLineGradients * horLineMask * horStrenth;
 
     //################################################## Galaxy color (add noise texture 2 times) ################################################## 
@@ -222,22 +192,9 @@ Sky.SkyShader = {
     starPos = vUv.y > 0.6 ? starPos : starPos * clamp(pow(vUv.y, 5.), 0., 1.0);
     float finalStarColor = starPos * starBright;
     finalStarColor = finalStarColor * finalGalaxyColor.b * 5. + finalStarColor * (1. - finalGalaxyColor.b) * 0.7;
-    float starMask = sunNightStep * (1. - step(0.2, finalmoonColor.b));
-
-    gl_FragColor.rgb += finalSunColor + finalmoonColor + finalSkyColor + (vec3(finalStarColor * 0.6) + finalGalaxyColor.rgb) * starMask;
+    
+    gl_FragColor.rgb += finalSunColor + finalSkyColor + (vec3(finalStarColor * 0.6) + finalGalaxyColor.rgb);
     gl_FragColor.a = 1.0;
-
-
-
-
-    // vec3 cameraToFrag = normalize(vWorldPosition.xyz);
-    // vec3 reflectionSample = textureCube(cubeMap, cameraToFrag).rgb;
-    // gl_FragColor.rgb += reflectionSample + finalSunColor;
-    // gl_FragColor.a = 1.0;
-
-
-
-
 
     vec2 flowVector = texture2D(flowMapTexture, vUv).rg * 2. - 1.;
 			

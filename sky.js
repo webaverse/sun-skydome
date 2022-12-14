@@ -53,6 +53,15 @@ Sky.SkyShader = {
     noiseTexture2: {
       value: null
     },
+    cubeMap: {
+      value: null
+    },
+    skyTexture: {
+      value: null
+    },
+    flowMapTexture: {
+      value: null
+    },
 	},
 
 	vertexShader: `\
@@ -85,12 +94,29 @@ Sky.SkyShader = {
   uniform sampler2D noiseTexture2;
   uniform sampler2D skydomeCloudTexture;
   uniform sampler2D flowMapTexture;
+  uniform sampler2D skyTexture;
   
   uniform float skyBoxRadius;
   uniform float uTime;
 
+  uniform samplerCube cubeMap;
+
+  vec3 FlowUVW (vec2 uv, vec2 flowVector, float flowOffset, float t, bool flowB) {
+    float phaseOffset = flowB ? 0.5 : 0.;
+    float speed = 0.2;
+    float time = t * speed;
+    float strength = 0.02;
+
+    float progress = fract(time + phaseOffset);
+    vec3 uvw;
+    uvw.xy = uv + flowVector * strength * (progress + flowOffset);
+    // uvw.xy += (time - progress);
+    uvw.z = 1. - abs(1. - 2. * progress);
+    return uvw;
+  }
+
   void main() {
-    //################################################## Sun light color ################################################## 
+    // //################################################## Sun light color ################################################## 
     float sunSize = 1000.;
     float sunInnerBound = 0.1;
     float sunOuterBound = 0.8;
@@ -196,10 +222,38 @@ Sky.SkyShader = {
     starPos = vUv.y > 0.6 ? starPos : starPos * clamp(pow(vUv.y, 5.), 0., 1.0);
     float finalStarColor = starPos * starBright;
     finalStarColor = finalStarColor * finalGalaxyColor.b * 5. + finalStarColor * (1. - finalGalaxyColor.b) * 0.7;
-    float starMask = 1. - sunNightStep * (1. - step(0.2, finalmoonColor.b));
+    float starMask = sunNightStep * (1. - step(0.2, finalmoonColor.b));
 
-    gl_FragColor.rgb += finalSunColor + finalmoonColor + finalSkyColor + (vec3(finalStarColor) + finalGalaxyColor.rgb) * starMask;
+    gl_FragColor.rgb += finalSunColor + finalmoonColor + finalSkyColor + (vec3(finalStarColor * 0.6) + finalGalaxyColor.rgb) * starMask;
     gl_FragColor.a = 1.0;
+
+
+
+
+    // vec3 cameraToFrag = normalize(vWorldPosition.xyz);
+    // vec3 reflectionSample = textureCube(cubeMap, cameraToFrag).rgb;
+    // gl_FragColor.rgb += reflectionSample + finalSunColor;
+    // gl_FragColor.a = 1.0;
+
+
+
+
+
+    vec2 flowVector = texture2D(flowMapTexture, vUv).rg * 2. - 1.;
+			
+    float noise = texture2D(noiseTexture, vUv).r;
+    float time = uTime + noise * 10.;
+    float flowOffset = 0.;
+
+    vec3 uvwA = FlowUVW(vUv, flowVector, flowOffset, time, false);
+    vec3 uvwB = FlowUVW(vUv, flowVector, flowOffset, time, true);
+
+    vec4 texA = texture2D(skyTexture, uvwA.xy) * uvwA.z;
+    vec4 texB = texture2D(skyTexture, uvwB.xy) * uvwB.z;
+
+    vec4 skyColor = texA + texB;
+
+    gl_FragColor.rgb += skyColor.rgb;
     
     ${THREE.ShaderChunk.logdepthbuf_fragment}
   }`

@@ -27,6 +27,17 @@ noiseTexture2.wrapS = noiseTexture2.wrapT = THREE.RepeatWrapping;
 const textureFlare0 = textureLoader.load(baseUrl + `./textures/Flare32.png`);
 const textureFlare3 = textureLoader.load(baseUrl + `./textures/lensflare3.png`);
 
+const skyTexture = textureLoader.load(baseUrl + `./textures/sky1.png`);
+skyTexture.wrapS = skyTexture.wrapT = THREE.RepeatWrapping;
+
+const flowMapTexture = textureLoader.load(baseUrl + `./textures/skyFlowMap.png`);
+flowMapTexture.wrapS = flowMapTexture.wrapT = THREE.RepeatWrapping;
+
+
+const loader = new THREE.CubeTextureLoader();
+loader.setPath( baseUrl + './textures/cloud4/' );
+const textureCube = loader.load( [ 'px.png', 'nx.png', 'py.png', 'ny.png', 'pz.png', 'nz.png' ] );
+textureCube.encoding = THREE.sRGBEncoding;
 
 
 export default () => {
@@ -98,16 +109,19 @@ export default () => {
     sky.material.uniforms.noiseTexture.value = noiseTexture;
     sky.material.uniforms.galaxyTexture.value = galaxyTexture;
     sky.material.uniforms.noiseTexture2.value = noiseTexture2;
-    
+    sky.material.uniforms.cubeMap.value = textureCube;
+
+    sky.material.uniforms.skyTexture.value = skyTexture;
+    sky.material.uniforms.flowMapTexture.value = flowMapTexture;
     
     const sun = new THREE.PointLight(0xffffff, 100, 2000);
     const lensflare = new Lensflare();
     const mainFlare = new LensflareElement(textureFlare0, 500, 0, sun.color, 0.2);
     lensflare.addElement(mainFlare);
-    lensflare.addElement(new LensflareElement(textureFlare3, 60, 0.6));
-    lensflare.addElement(new LensflareElement(textureFlare3, 70, 0.7));
-    lensflare.addElement(new LensflareElement(textureFlare3, 120, 0.9));
-    lensflare.addElement(new LensflareElement(textureFlare3, 70, 1));
+    lensflare.addElement(new LensflareElement(textureFlare3, 48, 0.6));
+    lensflare.addElement(new LensflareElement(textureFlare3, 56, 0.7));
+    lensflare.addElement(new LensflareElement(textureFlare3, 96, 0.9));
+    lensflare.addElement(new LensflareElement(textureFlare3, 56, 1));
     sun.add( lensflare );
     app.add( sun );
     
@@ -125,24 +139,24 @@ export default () => {
     
   }
   //############################################################## cloud ##############################################################
-  {
-    const cloud = new Cloud();
-    app.add(cloud);
-    cloud.material.uniforms.noiseTexture2.value = noiseTexture2
-    cloud.material.uniforms.cloudRadius.value = cloud.cloudRadius;
-    cloud.material.uniforms.cloudTexture1.value = cloudTexture1;
-    cloud.material.uniforms.cloudTexture2.value = cloudTexture2;
-    cloud.material.uniforms.cloudTexture3.value = cloudTexture3;
-    cloud.material.uniforms.cloudTexture4.value = cloudTexture4;
-    useFrame(({timestamp}) => {
-      const player = useLocalPlayer();
+  // {
+  //   const cloud = new Cloud();
+  //   app.add(cloud);
+  //   cloud.material.uniforms.noiseTexture2.value = noiseTexture2
+  //   cloud.material.uniforms.cloudRadius.value = cloud.cloudRadius;
+  //   cloud.material.uniforms.cloudTexture1.value = cloudTexture1;
+  //   cloud.material.uniforms.cloudTexture2.value = cloudTexture2;
+  //   cloud.material.uniforms.cloudTexture3.value = cloudTexture3;
+  //   cloud.material.uniforms.cloudTexture4.value = cloudTexture4;
+  //   useFrame(({timestamp}) => {
+  //     const player = useLocalPlayer();
       
-      cloud.material.uniforms.uTime.value = timestamp / 1000;
-      cloud.material.uniforms.sunPosition.value.set(sunPosition.x * cloud.cloudRadius, sunPosition.y * cloud.cloudRadius, sunPosition.z * cloud.cloudRadius)
-                                              .add(player.position);
-      app.updateMatrixWorld();
-    });
-  }
+  //     cloud.material.uniforms.uTime.value = timestamp / 1000;
+  //     cloud.material.uniforms.sunPosition.value.set(sunPosition.x * cloud.cloudRadius, sunPosition.y * cloud.cloudRadius, sunPosition.z * cloud.cloudRadius)
+  //                                             .add(player.position);
+  //     app.updateMatrixWorld();
+  //   });
+  // }
   
   app.setComponent('renderPriority', 'high');
   

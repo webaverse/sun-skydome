@@ -93,7 +93,7 @@ Sky.SkyShader = {
 
   vec3 FlowUVW (vec2 uv, vec2 flowVector, float flowOffset, float t, bool flowB) {
     float phaseOffset = flowB ? 0.5 : 0.;
-    float speed = 0.2;
+    float speed = 0.1;
     float time = t * speed;
     float strength = 0.02;
 

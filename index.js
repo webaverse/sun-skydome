@@ -24,7 +24,7 @@ const textureFlare3 = textureLoader.load(baseUrl + `./textures/lensflare3.png`);
 const skyTexture = textureLoader.load(baseUrl + `./textures/sky1.png`);
 skyTexture.wrapS = skyTexture.wrapT = THREE.RepeatWrapping;
 
-const flowMapTexture = textureLoader.load(baseUrl + `./textures/skyFlowMap.png`);
+const flowMapTexture = textureLoader.load(baseUrl + `./textures/cloudFlowMap3.png`);
 flowMapTexture.wrapS = flowMapTexture.wrapT = THREE.RepeatWrapping;
 
 

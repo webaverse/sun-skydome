@@ -2,17 +2,11 @@ import * as THREE from 'three';
 import { Lensflare, LensflareElement } from './Lensflare.js';
 
 import metaversefile from 'metaversefile';
-import {Cloud} from './cloud.js';
 import {Sky} from './sky.js';
 
-const {useApp, useFrame, useInternals, useLocalPlayer, useLightsManager} = metaversefile;
+const {useApp, useFrame, useInternals, useLightsManager} = metaversefile;
 const baseUrl = import.meta.url.replace(/(\/)[^\/\\]*$/, '$1');
 const textureLoader = new THREE.TextureLoader();
-
-const cloudTexture1 = textureLoader.load(baseUrl + `./textures/cloud1.png`);
-const cloudTexture2 = textureLoader.load(baseUrl + `./textures/cloud2.png`);
-const cloudTexture3 = textureLoader.load(baseUrl + `./textures/cloud3.png`);
-const cloudTexture4 = textureLoader.load(baseUrl + `./textures/cloud4.png`);
 
 const starTexture = textureLoader.load(baseUrl + `./textures/star3.png`);
 starTexture.wrapS = starTexture.wrapT = THREE.RepeatWrapping;
@@ -30,14 +24,8 @@ const textureFlare3 = textureLoader.load(baseUrl + `./textures/lensflare3.png`);
 const skyTexture = textureLoader.load(baseUrl + `./textures/sky1.png`);
 skyTexture.wrapS = skyTexture.wrapT = THREE.RepeatWrapping;
 
-const flowMapTexture = textureLoader.load(baseUrl + `./textures/skyFlowMap.png`);
+const flowMapTexture = textureLoader.load(baseUrl + `./textures/cloudFlowMap3.png`);
 flowMapTexture.wrapS = flowMapTexture.wrapT = THREE.RepeatWrapping;
-
-
-const loader = new THREE.CubeTextureLoader();
-loader.setPath( baseUrl + './textures/cloud4/' );
-const textureCube = loader.load( [ 'px.png', 'nx.png', 'py.png', 'ny.png', 'pz.png', 'nz.png' ] );
-textureCube.encoding = THREE.sRGBEncoding;
 
 
 export default () => {
@@ -109,8 +97,7 @@ export default () => {
     sky.material.uniforms.noiseTexture.value = noiseTexture;
     sky.material.uniforms.galaxyTexture.value = galaxyTexture;
     sky.material.uniforms.noiseTexture2.value = noiseTexture2;
-    sky.material.uniforms.cubeMap.value = textureCube;
-
+    
     sky.material.uniforms.skyTexture.value = skyTexture;
     sky.material.uniforms.flowMapTexture.value = flowMapTexture;
     
@@ -138,25 +125,6 @@ export default () => {
     });
     
   }
-  //############################################################## cloud ##############################################################
-  // {
-  //   const cloud = new Cloud();
-  //   app.add(cloud);
-  //   cloud.material.uniforms.noiseTexture2.value = noiseTexture2
-  //   cloud.material.uniforms.cloudRadius.value = cloud.cloudRadius;
-  //   cloud.material.uniforms.cloudTexture1.value = cloudTexture1;
-  //   cloud.material.uniforms.cloudTexture2.value = cloudTexture2;
-  //   cloud.material.uniforms.cloudTexture3.value = cloudTexture3;
-  //   cloud.material.uniforms.cloudTexture4.value = cloudTexture4;
-  //   useFrame(({timestamp}) => {
-  //     const player = useLocalPlayer();
-      
-  //     cloud.material.uniforms.uTime.value = timestamp / 1000;
-  //     cloud.material.uniforms.sunPosition.value.set(sunPosition.x * cloud.cloudRadius, sunPosition.y * cloud.cloudRadius, sunPosition.z * cloud.cloudRadius)
-  //                                             .add(player.position);
-  //     app.updateMatrixWorld();
-  //   });
-  // }
   
   app.setComponent('renderPriority', 'high');
   

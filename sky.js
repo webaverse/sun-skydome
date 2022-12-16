@@ -120,8 +120,8 @@ Sky.SkyShader = {
 
     //################################################## Sky color ################################################## 
     vec3 dayBottomColor = vec3(0.72, 0.82, 0.96);
-    vec3 dayMidColor = vec3(0.35, 0.83, 0.95);
-    vec3 dayTopColor = vec3(0.03, 0.43, 0.98);
+    vec3 dayMidColor = vec3(0.35, 0.83, 0.95) * 0.6;
+    vec3 dayTopColor = vec3(0.03, 0.43, 0.98) * 0.7;
 
     vec3 gradientDay = mix(dayBottomColor, dayMidColor, clamp(vUv.y, 0.0, 1.0)) * step(0.0, -vUv.y)
                        + mix(dayMidColor, dayTopColor, clamp(vUv.y, 0.0, 1.0)) * step(0.0, vUv.y);
